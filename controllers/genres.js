@@ -1,3 +1,4 @@
+const Genre = require("../models/genre");
 const Joi = require("joi");
 
 const genres = [
@@ -46,13 +47,38 @@ exports.createGenre = (req, res, next) => {
     if (error) {
         return res.status(400).json({message: error.message});
     }
-    const genre = {
-        id: genresLength + 1,
-        name: req.body.name
+
+    async function createGenre() {
+        // Created an object of my Genre model
+        const genre = new Genre({
+            name: req.body.name
+        });
+    
+        // async await implementation
+        try {
+            const result = await genre.save();
+            res.status(201).json({message: "Successfully Created", data: result});
+        } catch (err) {
+            res.status(500).json({message: "Error in creating a genre!"});
+        }
     }
-    genresLength++;
-    genres.push(genre);
-    res.status(201).json({message: "Successfully Created", data: genre});
+    createGenre();
+    // then() catch() implementation
+    // genre.save()
+    // .then((result) => {
+    //     res.status(201).json({message: "Successfully Created", data: result});
+    // })
+    // .catch((err) => {
+    //     res.status(500).json({message: "Error in creating a genre!"});
+    // });
+
+    // const genre = {
+    //     id: genresLength + 1,
+    //     name: req.body.name
+    // }
+    // genresLength++;
+    // genres.push(genre);
+    // res.status(201).json({message: "Successfully Created", data: genre});
 }
 
 exports.updateGenre = (req, res, next) => {

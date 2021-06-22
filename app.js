@@ -6,7 +6,11 @@ const mongoose = require("mongoose");
 const app = express();
 const genresRoutes = require("./routes/genres");
 
-mongoose.connect("mongodb://localhost/test")
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useUnifiedTopology', true);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
+mongoose.connect("mongodb://localhost/movie-renting-app")
     .then(() => {dbDebug("Database Connected...")})
     .catch((err) => {dbDebug("Database Connection Failed...", err)});
 
