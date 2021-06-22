@@ -1,8 +1,14 @@
 const express = require("express");
 const morgan = require("morgan");
 const debug = require("debug")("app:app.js");
+const dbDebug = require("debug")("app:db");
+const mongoose = require("mongoose");
 const app = express();
 const genresRoutes = require("./routes/genres");
+
+mongoose.connect("mongodb://localhost/test")
+    .then(() => {dbDebug("Database Connected...")})
+    .catch((err) => {dbDebug("Database Connection Failed...", err)});
 
 app.use(express.json())
 app.use(express.urlencoded({extended: false}));
