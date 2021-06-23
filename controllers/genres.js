@@ -1,68 +1,50 @@
 const Genre = require("../models/genre");
 const Joi = require("joi");
-
-const genres = [
-    {id: 1, name: "Action"},
-    {id: 2, name: "Adventure"},
-    {id: 3, name: "Comedy"},
-    {id: 4, name: "Crime and mystery"},
-    {id: 5, name: "Fantasy"},
-    {id: 6, name: "Historical"},
-    {id: 7, name: "Romance"},
-    {id: 8, name: "Horror"},
-    {id: 9, name: "Science fiction"},
-    {id: 10, name: "Thriller"},
-];
-
-let genresLength = genres.length;
+const debug = require("debug")("app:genres.controller");
 
 const validateGenre = (reqBody) => {
     const schema = Joi.object({
-        name: Joi.string().min(3).required()
+        name: Joi.string().min(3).max(50).required()
     });
     return schema.validate(reqBody).error;
 };
 
-exports.getGenres = (req, res, next) => {
-    res.status(200).json({data: genres});
+exports.getGenres = async (req, res, next) => {
+    const result = await Genre.find().sort({name: 1}).select({__v: false});
+    const count = await Genre.countDocuments();
+    res.status(200).json({data: result, count: count});
 }
 
-exports.getGenre = (req, res, next) => {
-    const genreId = +req.params.id;
-    const result = genres.find((genre) => genre.id === genreId);
-    if (!result) {
-        return res.status(404).json({message: "Genre not found with this id."});
+exports.getGenre = async (req, res, next) => {
+    try {
+        const genreId = req.params.id;
+        const result = await Genre.findById(genreId).select({__v: false});
+        debug(result);
+        res.status(200).json({data: result});
+    } catch (err) {
+        res.status(404).json({message: "Genre not found with this id"});
     }
-    res.status(200).json({data: result});
 }
 
-exports.createGenre = (req, res, next) => {
-    // if (!Object.entries(req.body).length) {
-    //     return res.status(400).json({message: "Missing genre object"});
-    // }
-    // if (!req.body.name) {
-    //     return res.status(400).json({message: "Missing genre name field"});
-    // }
+exports.createGenre = async (req, res, next) => {
     const error = validateGenre(req.body);
     if (error) {
         return res.status(400).json({message: error.message});
     }
 
-    async function createGenre() {
-        // Created an object of my Genre model
-        const genre = new Genre({
-            name: req.body.name
-        });
-    
-        // async await implementation
-        try {
-            const result = await genre.save();
-            res.status(201).json({message: "Successfully Created", data: result});
-        } catch (err) {
-            res.status(500).json({message: "Error in creating a genre!"});
-        }
+    // Created an object of my Genre model
+    const genre = new Genre({
+        name: req.body.name
+    });
+
+    // async await implementation
+    try {
+        const result = await genre.save();
+        res.status(201).json({message: "Successfully Created", data: result});
+    } catch (err) {
+        res.status(500).json({message: "Error in creating a genre!"});
     }
-    createGenre();
+
     // then() catch() implementation
     // genre.save()
     // .then((result) => {
@@ -71,40 +53,61 @@ exports.createGenre = (req, res, next) => {
     // .catch((err) => {
     //     res.status(500).json({message: "Error in creating a genre!"});
     // });
-
-    // const genre = {
-    //     id: genresLength + 1,
-    //     name: req.body.name
-    // }
-    // genresLength++;
-    // genres.push(genre);
-    // res.status(201).json({message: "Successfully Created", data: genre});
 }
 
-exports.updateGenre = (req, res, next) => {
+exports.updateGenre = async (req, res, next) => {
+    const genreId = req.params.id;
+    try {
+        const result = await Genre.findById(genreId);
+        debug(result);
+        if (!result) throw new Error();
+    } catch (err) {
+        return res.status(404).json({message: "Genre not found with this id."});
+    }
+
     const error = validateGenre(req.body);
     if (error) {
         return res.status(400).json({message: error.message});
     }
+    
+    // const body = new Genre({
+    //     _id: genreId,
+    //     name: req.body.name
+    // });
 
-    const genreId = +req.params.id;
-    const result = genres.find((genre) => genre.id === genreId);
-    if (!result) {
-        return res.status(404).json({message: "Genre not found with this id."});
-    }
-
-    result.name = req.body.name;
+    // Using update query operator => $set
+    const body = {
+        $set: {
+            name: req.body.name
+        }
+    };
+    try {
+    const result = await Genre.findOneAndUpdate({_id: genreId}, body, {new: true, runValidators: true}).select({__v: false});
     res.status(200).json({message: "Successfully Updated", data: result});
+    } catch (err) {
+        res.status(500).json({message: "Couldn't update the genre."});
+    }
 }
 
-exports.deleteGenre = (req, res, next) => {
-    const genreId = +req.params.id;
-    const result = genres.find((genre) => genre.id === genreId);
-    if (!result) {
-        return res.status(404).json({message: "Genre not found with this id."});
+exports.deleteGenre = async (req, res, next) => {
+    const genreId = req.params.id;
+    let result;
+    try {
+        result = await Genre.findById(genreId).select({name: 1});
+        debug(result);
+        // it is the case when a item with valid id is already deleted but if tried to delete again.
+        if (!result) throw new Error();
+    } catch (err) {
+        return res.status(400).json({message: "Genre not found with this id."});
     }
-
-    const index = genres.indexOf(result);
-    genres.splice(index, 1);
-    res.status(200).json({message: "Successfully Deleted", data: result});
+    try {
+        // findOneAndRemove() will also return me the deleted document data.
+        // const result = await Genre.findOneAndRemove({_id: genreId})
+        const deletedResult = await Genre.deleteOne({_id: genreId});
+        if (deletedResult.deletedCount > 0) {
+            res.status(200).json({message: "Successfully Deleted", data: result});
+        }
+    } catch (err) {
+        res.status(500).json({message: "Error in deleting genre!"});
+    }
 }

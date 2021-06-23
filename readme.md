@@ -8,3 +8,8 @@
 
 ## To start Nodejs server run:
 # npm run start:server
+
+## To import a JSON file in my mongo compass database:
+# mongoimport --db db-name --collection collection-name --drop --file myfile.json --jsonArray
+
+# --jsonArray flag signifies that json file will consist data like: [{...}, {...}, {...}...] => an array of objects.
