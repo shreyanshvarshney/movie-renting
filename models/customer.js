@@ -18,3 +18,6 @@ exports.validateCustomer = (reqBody) => {
     return schema.validate(reqBody).error;
 }
 
+exports.validateObjectId  = (id) => {
+    return mongoose.Types.ObjectId.isValid(id);
+};

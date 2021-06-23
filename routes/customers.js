@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {Customer, validateCustomer} = require("../models/customer");
+const {Customer, validateCustomer, validateObjectId} = require("../models/customer");
 const debug = require("debug")("app:routes.customers.js");
 
 
@@ -12,12 +12,13 @@ router.get("", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
     const cId = req.params.id;
+    if (!validateObjectId(cId)) return res.status(404).json({message: "Customer Not Found with this ID!"});
     try {
         const result = await Customer.findById(cId).select({__v: false});
-        if (!result) throw new Error();
+        if (!result) return res.status(404).json({message: "Customer Not Found with this ID!"});
         res.status(200).json({data: result});
     } catch (err) {
-        res.status(404).json({message: "Customer Not Found with this ID!"});
+        res.status(500).json({message: err.message});
     }
 });
 
@@ -41,12 +42,14 @@ router.post("", async (req, res, next) => {
 });
 
 router.patch("/:id", async (req, res, next) => {
+    const cId = req.params.id;
+    if (!validateObjectId(cId)) return res.status(404).json({message: "Customer Not Found with this ID!"});
+
     const error = validateCustomer(req.body);
     if (error) {
         return res.status(400).json({message: error.message});
     }
 
-    const cId = req.params.id;
     // const customer = new Customer({
     //     _id: cId,
     //     name: req.body.name,
@@ -62,21 +65,22 @@ router.patch("/:id", async (req, res, next) => {
     }
     try {
         const result = await Customer.findByIdAndUpdate(cId, customer, {new: true, runValidators: true}).select({__v: false});
-        if (!result) throw new Error();
+        if (!result) return res.status(404).json({message: "Customer Not Found with this ID!"});
         res.status(200).json({message: "Updated Successfully", data: result});
     } catch (err) {
-        res.status(404).json({message: "Customer Not Found with this ID!"});
+        res.status(500).json({message: err.message});
     }
 });
 
 router.delete("/:id", async (req, res, next) => {
     const cId = req.params.id;
+    if (!validateObjectId(cId)) return res.status(404).json({message: "Customer Not Found with this ID!"});
     try {
         const result = await Customer.findByIdAndRemove(cId).select({__v: false});
-        if (!result) throw new Error();
+        if (!result) return res.status(404).json({message: "Customer Not Found with this ID!"});
         res.status(200).json({message: "Deleted Successfully!", data: result});
     } catch (err) {
-        res.status(404).json({message: "Customer Not Found with this ID!"});
+        res.status(500).json({message: err.message});
     }
 });
 
