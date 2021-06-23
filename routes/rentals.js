@@ -60,8 +60,15 @@ router.post("", async (req, res, next) => {
     } catch (err) {
         res.status(500).json({message: err.message});
     }
-    movie.numberInStock--;
-    movie.save();
+    
+    const body = {
+        $inc: {
+            numberInStock: -1
+        }
+    };
+    Movie.updateOne({_id: movie._id}, body);
+    // movie.numberInStock--;
+    // movie.save();
 });
 
 module.exports = router;
