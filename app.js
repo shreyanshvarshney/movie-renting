@@ -5,6 +5,9 @@ const dbDebug = require("debug")("app:db");
 const mongoose = require("mongoose");
 const app = express();
 const genresRoutes = require("./routes/genres");
+const customersRoutes = require("./routes/customers");
+const moviesRoutes = require("./routes/movies");
+const rentalsRoutes = require("./routes/rentals");
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
@@ -33,5 +36,8 @@ app.use("/health", (req, res, next) => {
 });
 
 app.use("/api/genres", genresRoutes);
+app.use("/api/customers", customersRoutes);
+app.use("/api/movies", moviesRoutes);
+app.use("/api/rentals", rentalsRoutes);
 
 module.exports = app;

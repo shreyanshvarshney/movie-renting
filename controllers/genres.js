@@ -1,13 +1,5 @@
-const Genre = require("../models/genre");
-const Joi = require("joi");
+const {Genre, validateGenre} = require("../models/genre");
 const debug = require("debug")("app:genres.controller");
-
-const validateGenre = (reqBody) => {
-    const schema = Joi.object({
-        name: Joi.string().min(3).max(50).required()
-    });
-    return schema.validate(reqBody).error;
-};
 
 exports.getGenres = async (req, res, next) => {
     const result = await Genre.find().sort({name: 1}).select({__v: false});
