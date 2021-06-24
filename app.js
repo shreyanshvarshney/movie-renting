@@ -9,6 +9,10 @@ const customersRoutes = require("./routes/customers");
 const moviesRoutes = require("./routes/movies");
 const rentalsRoutes = require("./routes/rentals");
 
+// The Joi objectId() method will be used in many modules, so i have defined it here once in app.js instead of each module.
+const Joi = require("joi");
+Joi.objectId = require('joi-objectid')(Joi);
+
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
 mongoose.set('useCreateIndex', true);

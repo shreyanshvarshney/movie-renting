@@ -40,6 +40,11 @@ router.post("", async (req, res, next) => {
     });
 
     try {
+        // [Note]: Its not neccessary to create a new variable result here, I can pass my movie object in response for the client also.
+        // Like this: 
+        // await movie.save();
+        // res.status(201).json({message: "Successfully Created", data: movie});
+        
         const result = await movie.save();
         res.status(201).json({message: "Successfully Created", data: result});
     } catch (err) {

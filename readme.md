@@ -1,15 +1,25 @@
-## To install mongod server locally:
-# brew tap mongodb/brew
-# brew install mongodb-community@4.4
+## Local Setup
 
-## To start the mongod server after installation:
-# brew services start mongodb-community@4.4
-# brew services stop mongodb-community@4.4
+To install mongod server locally
 
-## To start Nodejs server run:
-# npm run start:server
+```bash
+  brew tap mongodb/brew
+  brew install mongodb-community@4.4
+```
+To start the mongod server after installation
 
-## To import a JSON file in my mongo compass database:
-# mongoimport --db db-name --collection collection-name --drop --file myfile.json --jsonArray
+```bash
+  brew services start mongodb-community@4.4
+  brew services stop mongodb-community@4.4
+```
+To start Node.js server run (nodemon custom command)
 
-# --jsonArray flag signifies that json file will consist data like: [{...}, {...}, {...}...] => an array of objects.
+```bash
+  npm run start:server
+```
+To import a JSON file in my mongo compass database:
+
+```bash
+  mongoimport --db db-name --collection collection-name --drop --file myfile.json --jsonArray
+```
+Note: --jsonArray flag signifies that json file will consist data like: [{...}, {...}, {...}...] => an array of objects.

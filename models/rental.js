@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-Joi.objectId = require('joi-objectid')(Joi)
 
 // Points to remember that customer field of my rental schema can be like this:
 // const customerSchema = require("../models/customer");
