@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
 
-const genreSchema = new mongoose.Schema({
+exports.genreSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -11,7 +11,7 @@ const genreSchema = new mongoose.Schema({
     }
 });
 
-exports.Genre = mongoose.model("Genre", genreSchema);
+exports.Genre = mongoose.model("Genre", this.genreSchema);
 
 exports.validateGenre = (reqBody) => {
     const schema = Joi.object({
@@ -20,3 +20,6 @@ exports.validateGenre = (reqBody) => {
     return schema.validate(reqBody).error;
 };
 
+exports.validateObjectId  = (id) => {
+    return mongoose.Types.ObjectId.isValid(id);
+};

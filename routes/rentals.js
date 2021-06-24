@@ -15,19 +15,12 @@ router.post("", async (req, res, next) => {
     if (error) {
         return res.status(400).json({message: error.message});
     }
-    let customer, movie;
-    try {
-        customer = await Customer.findById(req.body.customerId);
-        if (!customer) throw new Error();
-    } catch (err) {
-        return res.status(400).json({message: "Invalid Customer!"});
-    }
-    try {
-        movie = await Movie.findById(req.body.movieId);
-        if (!movie) throw new Error();
-    } catch (err) {
-        return res.status(400).json({message: "Invalid Movie!"});
-    }
+
+    const customer = await Customer.findById(req.body.customerId);
+    if (!customer) return res.status(400).json({message: "Invalid Customer!"});
+
+    const movie = await Movie.findById(req.body.movieId);
+    if (!movie) return res.status(400).json({message: "Invalid Movie!"});
 
     if (movie.numberInStock === 0) {
         return res.status(400).json({message: "Movie not in stock!"});
@@ -37,6 +30,7 @@ router.post("", async (req, res, next) => {
         customer: {
             _id: customer._id,
             name: customer.name,
+            email: customer.email,
             isPremium: customer.isPremium,
             phone: customer.phone,
         },
@@ -45,7 +39,7 @@ router.post("", async (req, res, next) => {
             title: movie.title,
             dailyRentalRate: movie.dailyRentalRate
         },
-        rentalFee: movie.dailyRentalRate,
+        rentalFee: movie.dailyRentalRate
     });
 
     // The use of transaction here is because:
@@ -58,7 +52,7 @@ router.post("", async (req, res, next) => {
         const result = await rental.save();
         res.status(201).json({message: "Successfully Rented", data: result});
     } catch (err) {
-        res.status(500).json({message: err.message});
+        return res.status(500).json({message: err.message});
     }
     
     const body = {
@@ -66,7 +60,7 @@ router.post("", async (req, res, next) => {
             numberInStock: -1
         }
     };
-    Movie.updateOne({_id: movie._id}, body);
+    await Movie.updateOne({_id: movie._id}, body);
     // movie.numberInStock--;
     // movie.save();
 });

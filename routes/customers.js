@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {Customer, validateCustomer, validateObjectId} = require("../models/customer");
+const {Customer, validateCustomer, validateUpdateCustomer, validateObjectId} = require("../models/customer");
 const debug = require("debug")("app:routes.customers.js");
 
 
@@ -30,6 +30,7 @@ router.post("", async (req, res, next) => {
     }
     const customer = new Customer({
         name: req.body.name,
+        email: req.body.email,
         isPremium: req.body.isPremium,
         phone: req.body.phone
     });
@@ -37,6 +38,7 @@ router.post("", async (req, res, next) => {
         const result = await customer.save();
         res.status(201).json({message: "Successfully Created", data: result});
     } catch (err) {
+        if (err.name === "MongoError") return res.status(400).json({message: err.message});
         res.status(500).json({message: err.message});
     }
 });
@@ -45,7 +47,7 @@ router.patch("/:id", async (req, res, next) => {
     const cId = req.params.id;
     if (!validateObjectId(cId)) return res.status(404).json({message: "Customer Not Found with this ID!"});
 
-    const error = validateCustomer(req.body);
+    const error = validateUpdateCustomer(req.body);
     if (error) {
         return res.status(400).json({message: error.message});
     }
@@ -56,18 +58,18 @@ router.patch("/:id", async (req, res, next) => {
     //     isPremium: req.body.isPremium,
     //     phone: req.body.phone
     // });
+    // $set is a mongodb update operator to directly update in the document.
     const customer = {
-        $set: {
-            name: req.body.name,
-            isPremium: req.body.isPremium,
-            phone: req.body.phone
-        }
+        $set: req.body
+        // As req.body is itself an Object
+        // This approach will update/set only the fields mentioned in my req.body
     }
     try {
         const result = await Customer.findByIdAndUpdate(cId, customer, {new: true, runValidators: true}).select({__v: false});
         if (!result) return res.status(404).json({message: "Customer Not Found with this ID!"});
         res.status(200).json({message: "Updated Successfully", data: result});
     } catch (err) {
+        if (err.name === "ValidationError") return res.status(400).json({message: err.message});
         res.status(500).json({message: err.message});
     }
 });

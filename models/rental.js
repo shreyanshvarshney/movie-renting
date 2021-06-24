@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
+Joi.objectId = require('joi-objectid')(Joi)
 
 // Points to remember that customer field of my rental schema can be like this:
 // const customerSchema = require("../models/customer");
@@ -15,15 +16,16 @@ const Joi = require("joi");
 const rentalSchema = new mongoose.Schema({
     customer: {
         type: new mongoose.Schema({
-            name: {type: String, required: true, minLength: 3, maxLength: 50, trim: true},
+            name: {type: String, required: true, minLength: 3, maxLength: 50},
+            email: {type: String, required: true, minLength: 3, maxLength: 50},
             isPremium: {type: Boolean, default: false},
-            phone: {type: String, required: true, minLength: 5, maxLength: 50, trim: true}
+            phone: {type: String, required: true, minLength: 5, maxLength: 50}
         }),
         required: true
     },
     movie: {
         type: new mongoose.Schema({
-            title: {type: String, required: true, unique: true, trim: true, minLength: 3, maxLength: 255},
+            title: {type: String, required: true, trim: true, minLength: 3, maxLength: 255},
             dailyRentalRate: {type: Number, required: true, min: 0, max: 255},
         }),
         required: true
@@ -37,8 +39,8 @@ exports.Rental = mongoose.model("Rental", rentalSchema);
 
 exports.validateRental = (reqBody) => {
     const schema = Joi.object({
-        customerId: Joi.string().required(),
-        movieId: Joi.string().required()
+        customerId: Joi.objectId().required(),
+        movieId: Joi.objectId().required()
     });
     return schema.validate(reqBody).error;
 };

@@ -1,20 +1,27 @@
-const {Genre, validateGenre} = require("../models/genre");
+const {Genre, validateGenre, validateObjectId} = require("../models/genre");
 const debug = require("debug")("app:genres.controller");
 
 exports.getGenres = async (req, res, next) => {
-    const result = await Genre.find().sort({name: 1}).select({__v: false});
-    const count = await Genre.countDocuments();
-    res.status(200).json({data: result, count: count});
+    try { 
+        const result = await Genre.find().sort({name: 1}).select({__v: false});
+        const count = await Genre.countDocuments();
+        res.status(200).json({data: result, count: count});
+    } catch (err) {
+        res.status(500).json({message: err.message});
+    } 
 }
 
 exports.getGenre = async (req, res, next) => {
+    const genreId = req.params.id;
+    if (!validateObjectId(genreId)) return res.status(404).json({message: "Genre Not Found with this ID!"});
+
     try {
-        const genreId = req.params.id;
         const result = await Genre.findById(genreId).select({__v: false});
+        if (!result) return res.status(404).json({message: "Genre Not Found with this ID!"}); 
         debug(result);
         res.status(200).json({data: result});
     } catch (err) {
-        res.status(404).json({message: "Genre not found with this id"});
+        res.status(500).json({message: err.message});
     }
 }
 
@@ -34,7 +41,8 @@ exports.createGenre = async (req, res, next) => {
         const result = await genre.save();
         res.status(201).json({message: "Successfully Created", data: result});
     } catch (err) {
-        res.status(500).json({message: "Error in creating a genre!"});
+        if (err.name === "MongoError" || err.name === "ValidationError") return res.status(400).json({message: err.message});
+        res.status(500).json({message: err.message});
     }
 
     // then() catch() implementation
@@ -49,13 +57,7 @@ exports.createGenre = async (req, res, next) => {
 
 exports.updateGenre = async (req, res, next) => {
     const genreId = req.params.id;
-    try {
-        const result = await Genre.findById(genreId);
-        debug(result);
-        if (!result) throw new Error();
-    } catch (err) {
-        return res.status(404).json({message: "Genre not found with this id."});
-    }
+    if (!validateObjectId(genreId)) return res.status(404).json({message: "Genre Not Found with this ID!"});
 
     const error = validateGenre(req.body);
     if (error) {
@@ -74,32 +76,28 @@ exports.updateGenre = async (req, res, next) => {
         }
     };
     try {
-    const result = await Genre.findOneAndUpdate({_id: genreId}, body, {new: true, runValidators: true}).select({__v: false});
-    res.status(200).json({message: "Successfully Updated", data: result});
+        const result = await Genre.findOneAndUpdate({_id: genreId}, body, {new: true, runValidators: true}).select({__v: false});
+        if (!result) return res.status(404).json({message: "Genre Not Found with this ID!"}); 
+        res.status(200).json({message: "Successfully Updated", data: result});
     } catch (err) {
-        res.status(500).json({message: "Couldn't update the genre."});
+        if (err.name === "ValidationError") return res.status(400).json({message: err.message});
+        res.status(500).json({message: err.message});
     }
 }
 
 exports.deleteGenre = async (req, res, next) => {
     const genreId = req.params.id;
-    let result;
+    if (!validateObjectId(genreId)) return res.status(404).json({message: "Genre Not Found with this ID!"});
+
     try {
-        result = await Genre.findById(genreId).select({name: 1});
-        debug(result);
-        // it is the case when a item with valid id is already deleted but if tried to delete again.
-        if (!result) throw new Error();
+        // findOneAndRemove() will return me the deleted document data.
+        const result = await Genre.findOneAndRemove({_id: genreId});
+
+        // it is the case when a item with valid mongo id is already deleted but if tried to delete again.
+        if (!result) return res.status(404).json({message: "Genre Not Found with this ID!"});
+
+        res.status(200).json({message: "Successfully Deleted", data: result});
     } catch (err) {
-        return res.status(400).json({message: "Genre not found with this id."});
-    }
-    try {
-        // findOneAndRemove() will also return me the deleted document data.
-        // const result = await Genre.findOneAndRemove({_id: genreId})
-        const deletedResult = await Genre.deleteOne({_id: genreId});
-        if (deletedResult.deletedCount > 0) {
-            res.status(200).json({message: "Successfully Deleted", data: result});
-        }
-    } catch (err) {
-        res.status(500).json({message: "Error in deleting genre!"});
+        res.status(500).json({message: err.message});
     }
 }

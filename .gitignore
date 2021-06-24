@@ -1,5 +1,6 @@
 # Custom
 exercise.js
+myTypes.d.ts
 
 # compiled output
 /dist
