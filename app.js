@@ -8,6 +8,7 @@ const genresRoutes = require("./routes/genres");
 const customersRoutes = require("./routes/customers");
 const moviesRoutes = require("./routes/movies");
 const rentalsRoutes = require("./routes/rentals");
+const usersRoutes = require("./routes/users");
 
 // The Joi objectId() method will be used in many modules, so i have defined it here once in app.js instead of each module.
 const Joi = require("joi");
@@ -35,7 +36,7 @@ if (app.get("env") === "development") {
     debug("Enabled Morgan Requests Logger...");
 }
 
-app.use("/health", (req, res, next) => {
+app.get("/", (req, res, next) => {
     res.status(200).json({status: "ok"});
 });
 
@@ -43,5 +44,6 @@ app.use("/api/genres", genresRoutes);
 app.use("/api/customers", customersRoutes);
 app.use("/api/movies", moviesRoutes);
 app.use("/api/rentals", rentalsRoutes);
+app.use("/api/users", usersRoutes);
 
 module.exports = app;

@@ -18,3 +18,6 @@ const server = http.createServer(app);
 server.on("listening", onListening);
 server.on("error", onError);
 server.listen(port);
+// app.listen(port, () => {
+//     debug("Listening on port: " + port);
+// });

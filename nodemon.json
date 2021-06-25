@@ -1,6 +1,7 @@
 {
     "env": {
         "NODE_ENV": "development",
-        "DEBUG": "app:*"
+        "DEBUG": "app:*",
+        "JWT_KEY": "this_key_should_be_very_anonymous"
     }
 }
