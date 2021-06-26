@@ -25,7 +25,9 @@ userSchema.methods.generateAuthToken = function() {
     return token;
 }
 
-const validateCreateUser = (reqBody) => {
+exports.User = mongoose.model("User", userSchema);
+
+exports.validateCreateUser = (reqBody) => {
     const schema = Joi.object({
         name: Joi.string().min(3).max(50).required(),
         email: Joi.string().min(5).max(255).required().email(),
@@ -34,14 +36,10 @@ const validateCreateUser = (reqBody) => {
     return schema.validate(reqBody);
 }
 
-const validateUserLogin = (reqBody) => {
+exports.validateUserLogin = (reqBody) => {
     const schema = Joi.object({
         email: Joi.string().min(5).max(255).required().email(),
         password: Joi.string().min(5).max(255).required()
     });
     return schema.validate(reqBody);
 }
-
-exports.User = mongoose.model("User", userSchema);
-exports.validateCreateUser = validateCreateUser;
-exports.validateUserLogin = validateUserLogin;

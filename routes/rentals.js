@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const { Rental, validateRental } = require("../models/rental");
 const { Movie } = require("../models/movie");
 const { Customer } = require("../models/customer");
+const checkAuth = require("../middlewares/check-auth");
 
 Fawn.init(mongoose);
 
@@ -14,7 +15,7 @@ router.get("", async (req, res, next) => {
     res.status(200).json({data: result, count: count});
 });
 
-router.post("", async (req, res, next) => {
+router.post("", checkAuth, async (req, res, next) => {
     const error = validateRental(req.body);
     if (error) {
         return res.status(400).json({message: error.message});

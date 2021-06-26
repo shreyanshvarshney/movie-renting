@@ -12,7 +12,18 @@ router.get("", checkAuth, async (req, res) => {
     try {
         debug(req.userData);
         const users = await User.find().sort({name: 1}).select({__v: false, password: false});
-        res.status(200).send(users);
+        const count = await User.countDocuments();
+        res.status(200).json({data: users, count: count});
+    } catch (err) {
+        res.status(500).json({message: err.message});
+    }
+});
+
+router.get("/me", checkAuth, async (req, res) => {
+    try {
+        debug(req.userData);
+        const user = await User.findById(req.userData._id).select({__v: false, password: false});
+        res.status(200).send(user);
     } catch (err) {
         res.status(500).json({message: err.message});
     }
@@ -39,7 +50,7 @@ router.post("/signup", async (req, res, next) => {
 
         // This is a custom method I added in user object in userSchema.methods.generateAuthToken
         const token = user.generateAuthToken();
-        
+
         res.setHeader("Authorization", token);
         // Lodash provides me alot of utility functions for every data structure like Objects, arrays, strings etc.
         // Lodash is optimized version of underscore.js

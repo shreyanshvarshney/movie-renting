@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { Movie, validateMovie } = require("../models/movie");
 const { Genre } = require("../models/genre");
+const checkAuth = require("../middlewares/check-auth");
 
 router.get("", async (req, res, next) => {
     try { 
@@ -14,7 +15,7 @@ router.get("", async (req, res, next) => {
     }
 });
 
-router.post("", async (req, res, next) => {
+router.post("", checkAuth, async (req, res, next) => {
     const error = validateMovie(req.body);
     if (error) {
         return res.status(400).json({message: error.message});

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {Customer, validateCustomer, validateUpdateCustomer, validateObjectId} = require("../models/customer");
 const debug = require("debug")("app:routes.customers.js");
+const checkAuth = require("../middlewares/check-auth");
 
 
 router.get("", async (req, res, next) => {
@@ -22,7 +23,7 @@ router.get("/:id", async (req, res, next) => {
     }
 });
 
-router.post("", async (req, res, next) => {
+router.post("", checkAuth, async (req, res, next) => {
     debug(req.body);
     const error = validateCustomer(req.body);
     if (error) {
@@ -43,7 +44,7 @@ router.post("", async (req, res, next) => {
     }
 });
 
-router.patch("/:id", async (req, res, next) => {
+router.patch("/:id", checkAuth, async (req, res, next) => {
     const cId = req.params.id;
     if (!validateObjectId(cId)) return res.status(404).json({message: "Customer Not Found with this ID!"});
 
@@ -74,7 +75,7 @@ router.patch("/:id", async (req, res, next) => {
     }
 });
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", checkAuth, async (req, res, next) => {
     const cId = req.params.id;
     if (!validateObjectId(cId)) return res.status(404).json({message: "Customer Not Found with this ID!"});
     try {
