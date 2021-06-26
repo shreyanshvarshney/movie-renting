@@ -9,10 +9,17 @@ const customersRoutes = require("./routes/customers");
 const moviesRoutes = require("./routes/movies");
 const rentalsRoutes = require("./routes/rentals");
 const usersRoutes = require("./routes/users");
+const authRoutes = require("./routes/auth");
 
 // The Joi objectId() method will be used in many modules, so i have defined it here once in app.js instead of each module.
 const Joi = require("joi");
 Joi.objectId = require('joi-objectid')(Joi);
+
+const config = require("config");
+if (!config.get("JWT_KEY")) {
+    console.log("FATAL Error: JWT_KEY is not defined");
+    process.exit(1);
+}
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
@@ -45,5 +52,6 @@ app.use("/api/customers", customersRoutes);
 app.use("/api/movies", moviesRoutes);
 app.use("/api/rentals", rentalsRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/auth", authRoutes);
 
 module.exports = app;

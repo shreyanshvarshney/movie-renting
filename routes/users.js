@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const debug = require("debug")("app:users.routes");
-const { User, validateCreateUser, validateUserLogin } = require("../models/user");
 const bcrypt = require("bcryptjs");
+const lodash = require("lodash");
+const config = require("config");
 const jwt = require("jsonwebtoken");
-const auth = require("../middlewares/auth");
+const { User, validateCreateUser } = require("../models/user");
+const checkAuth = require("../middlewares/check-auth");
 
-router.get("", auth, async (req, res) => {
+router.get("", checkAuth, async (req, res) => {
     try {
         debug(req.userData);
         const users = await User.find().sort({name: 1}).select({__v: false, password: false});
@@ -34,35 +36,21 @@ router.post("/signup", async (req, res, next) => {
         });
         debug(user);
         const result = await user.save();
-        res.status(201).json({message: "Successfully Created", data: {_id: result._id, name: result.name, email: result.email}});
+
+        // This is a custom method I added in user object in userSchema.methods.generateAuthToken
+        const token = user.generateAuthToken();
+        
+        res.setHeader("Authorization", token);
+        // Lodash provides me alot of utility functions for every data structure like Objects, arrays, strings etc.
+        // Lodash is optimized version of underscore.js
+        // res.status(201).json({message: "Successfully Created", data: {_id: result._id, name: result.name, email: result.email}});
+        // Instead of repeating result. result. again again, I can use lodash for creating custom object with selected values to send my client.
+        res.status(201).json({
+            message: "Successfully Created", 
+            data: lodash.pick(result, ["_id", "name", "email"])
+        });
     } catch (err) {
         if (err.name === "MongoError" || err.name === "ValidationError") return res.status(400).json({message: err.message});
-        res.status(500).json({message: err.message});
-    }
-});
-
-router.post("/login", async (req, res, next) => {
-    const error = validateUserLogin(req.body).error;
-    if (error) {
-        return res.status(400).json({message: error.message});
-    }
-
-    try {
-        const user = await User.findOne({email: req.body.email});
-        if (!user) return res.status(401).json({message: "Email is incorrect!"});
-    
-        const validPassword = await bcrypt.compare(req.body.password, user.password);
-        if (!validPassword) return res.status(401).json({message: "Password is incorrect!"});
-    
-        // JWT Config
-        const payload = {
-            _id: user._id,
-            email: user.email
-        };
-        const token = jwt.sign(payload, process.env.JWT_KEY, {expiresIn: "10h"});
-    
-        res.status(200).json({token: token, expiresIn: "10 hours"});
-    } catch (err) {
         res.status(500).json({message: err.message});
     }
 });
