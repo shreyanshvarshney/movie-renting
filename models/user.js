@@ -6,7 +6,8 @@ const jwt = require("jsonwebtoken");
 const userSchema = new mongoose.Schema({
     name: {type: String, required: true, trim: true, minLength: 3, maxLength: 50},
     email: {type: String, required: true, unique: true, minLength: 5, maxLength: 255},
-    password: {type: String, required: true, minLength: 5}
+    password: {type: String, required: true, minLength: 5},
+    isAdmin: {type: Boolean, default: false}
 });
 
 // According to "Information Expert Principle" in OOPs
@@ -19,7 +20,8 @@ userSchema.methods.generateAuthToken = function() {
     // here this refers to the userSchema object.
     const payload = {
         _id: this._id,
-        email: this.email
+        email: this.email,
+        isAdmin: this.isAdmin
     };
     const token = jwt.sign(payload, config.get("JWT_KEY"), {expiresIn: "10h"});
     return token;

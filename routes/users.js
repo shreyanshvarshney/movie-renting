@@ -7,8 +7,9 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 const { User, validateCreateUser } = require("../models/user");
 const checkAuth = require("../middlewares/check-auth");
+const admin = require("../middlewares/admin");
 
-router.get("", checkAuth, async (req, res) => {
+router.get("", [checkAuth, admin], async (req, res) => {
     try {
         debug(req.userData);
         const users = await User.find().sort({name: 1}).select({__v: false, password: false});

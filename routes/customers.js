@@ -3,7 +3,7 @@ const router = express.Router();
 const {Customer, validateCustomer, validateUpdateCustomer, validateObjectId} = require("../models/customer");
 const debug = require("debug")("app:routes.customers.js");
 const checkAuth = require("../middlewares/check-auth");
-
+const admin = require("../middlewares/admin");
 
 router.get("", async (req, res, next) => {
     const result = await Customer.find().sort({name: 1}).select({__v: false});
@@ -75,7 +75,7 @@ router.patch("/:id", checkAuth, async (req, res, next) => {
     }
 });
 
-router.delete("/:id", checkAuth, async (req, res, next) => {
+router.delete("/:id", [checkAuth, admin], async (req, res, next) => {
     const cId = req.params.id;
     if (!validateObjectId(cId)) return res.status(404).json({message: "Customer Not Found with this ID!"});
     try {
