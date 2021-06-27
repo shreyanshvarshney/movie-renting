@@ -44,3 +44,29 @@ Note: --jsonArray flag signifies that json file will consist data like: [{...}, 
 ```bash
   export DEBUG=app:*
 ``` 
+
+## Database Modelling
+
+#### Genre
+
+| Id | name     |
+| :-------- | :------- |
+| `string` | `string` |
+
+#### Customer
+
+| Id | name | isPremium | email | phone |
+| :-------- | :-------- | :-------- | :-------- | :-------- |
+| `string` | `string` | `boolean` | **unique**. `string` | `string` |
+
+#### Movie
+
+| Id | title | language | numberInStock | dailyRentalRate | genre |
+| :-------- | :-------- | :-------- | :-------- | :-------- | :-------- |
+| `string` | `string` | `string` | `number` | `number` | `ref to Genre Model` |
+
+#### Rental
+
+| Id | customer | movie | rentalFee | dateOut | dateReturned |
+| :-------- | :-------- | :-------- | :-------- | :-------- | :-------- |
+| `string` | `ref to Customer Model` | `ref to Movie Model` | `number` | `date` | `date` |
