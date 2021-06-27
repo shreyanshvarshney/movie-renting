@@ -1,11 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const moment = require("moment");
+const Fawn = require("fawn");
+const mongoose = require("mongoose");
+const lodash = require("lodash");
 
 const {Customer} = require("../models/customer");
 const {Movie} = require("../models/movie");
 const {Rental} = require("../models/rental");
 const {validateRental} = require("../models/rental");
+
+// Fawn.init(mongoose);
+// Commented this initialization becoz it has been already initailized in rentals.js
 
 router.post("", async (req, res, next) => {
     const error = validateRental(req.body);
@@ -25,12 +31,25 @@ router.post("", async (req, res, next) => {
     rental.dateReturned = new Date();
     const diff = moment().diff(rental.dateOut, 'days');
     rental.rentalFee = movie.dailyRentalRate * diff;
-    await rental.save();
+
+    const task = new Fawn.Task();
+
+    try {
+        task.update("rentals", {_id: rental._id}, {$set: lodash.pick(rental, ["dateReturned", "rentalFee"])} )
+        .update("movies", {_id: movie._id}, {$inc: {numberInStock: 1}})
+        .run();
+
+        res.status(200).json({message: "Renal returned successfully", data: rental});
+    } catch (err) {
+        next(err);
+    }
+
+    // await rental.save();
+
     // movie.numberInStock++;
     // await movie.save();
-    await Movie.updateOne({_id: movie._id}, {$inc: {numberInStock: 1}});
-
-    res.status(200).json({message: "Renal returned successfully", data: rental});
+    // OR
+    // await Movie.updateOne({_id: movie._id}, {$inc: {numberInStock: 1}});
 });
 
 module.exports = router;
