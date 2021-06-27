@@ -43,8 +43,7 @@ router.post("", checkAuth, async (req, res, next) => {
             _id: movie._id,
             title: movie.title,
             dailyRentalRate: movie.dailyRentalRate
-        },
-        rentalFee: movie.dailyRentalRate
+        }
     });
 
     // The use of transaction here is because:

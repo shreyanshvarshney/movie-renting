@@ -11,6 +11,7 @@ const moviesRoutes = require("./routes/movies");
 const rentalsRoutes = require("./routes/rentals");
 const usersRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
+const returnsRoutes = require("./routes/returns");
 
 // The Joi objectId() method will be used in many modules, so i have defined it here once in app.js instead of each module.
 const Joi = require("joi");
@@ -54,6 +55,7 @@ app.use("/api/movies", moviesRoutes);
 app.use("/api/rentals", rentalsRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/returns", returnsRoutes);
 
 // In express I have special kind of middleware function called Error Middleware. I execute this, after all exsisting middle functions.
 // Now I have a single place for responsing internal server errors.
