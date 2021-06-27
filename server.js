@@ -11,6 +11,16 @@ const onError = (error) => {
     debug("Some error occured!")
 };
 
+const onUncaughtException = (error) => {
+    debug("Got an Uncaught Exception!", error.message);
+    process.exit(1);
+};
+
+const onUnhandledRejection = (error) => {
+    debug("Got an Unhandled Promise Rejection!", error.message);
+    process.exit(1);
+};
+
 const port = process.env.PORT || 3000;
 app.set("port", port);
 
@@ -21,3 +31,5 @@ server.listen(port);
 // app.listen(port, () => {
 //     debug("Listening on port: " + port);
 // });
+process.on("uncaughtException", onUncaughtException);
+process.on("unhandledRejection", onUnhandledRejection);

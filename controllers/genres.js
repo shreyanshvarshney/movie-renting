@@ -7,7 +7,8 @@ exports.getGenres = async (req, res, next) => {
         const count = await Genre.countDocuments();
         res.status(200).json({data: result, count: count});
     } catch (err) {
-        res.status(500).json({message: err.message});
+        next(err)
+        // res.status(500).json({message: err.message});
     } 
 }
 

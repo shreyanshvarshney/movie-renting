@@ -4,6 +4,7 @@ const debug = require("debug")("app:app.js");
 const dbDebug = require("debug")("app:db");
 const mongoose = require("mongoose");
 const app = express();
+const errorHandler = require("./middlewares/error");
 const genresRoutes = require("./routes/genres");
 const customersRoutes = require("./routes/customers");
 const moviesRoutes = require("./routes/movies");
@@ -53,5 +54,15 @@ app.use("/api/movies", moviesRoutes);
 app.use("/api/rentals", rentalsRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/auth", authRoutes);
+
+// In express I have special kind of middleware function called Error Middleware. I execute this, after all exsisting middle functions.
+// Now I have a single place for responsing internal server errors.
+// This function catched any errors in request process pipeline.
+// It will ignore anything outside the context of express. So if something goes wrong during the app startup this function is not going to be executed.
+// Thats why I handled uncaught exceptions and unhandled promises seperately in server.js
+// app.use((err, req, res, next) => {
+//     res.status(500).json({message: err.message});
+// });
+app.use(errorHandler);
 
 module.exports = app;
