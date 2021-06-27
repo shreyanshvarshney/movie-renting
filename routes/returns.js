@@ -23,18 +23,20 @@ router.post("", async (req, res, next) => {
     const movie = await Movie.findById(req.body.movieId);
     if (!movie) return res.status(400).json({message: "Invalid Movie!"});
 
-    const rental = await Rental.findOne({"customer._id": req.body.customerId, "movie._id": req.body.movieId});
+    const rental = await Rental.findRental(req.body.customerId, req.body.movieId);
     if (!rental) return res.status(400).json({message: "Rental not found with this given Customer and Movie!"});
 
     if (rental.dateReturned) return res.status(400).json({message: "Rental already processed."});
 
-    rental.dateReturned = new Date();
-    const diff = moment().diff(rental.dateOut, 'days');
-    rental.rentalFee = movie.dailyRentalRate * diff;
+    // rental.dateReturned = new Date();
+    // const diff = moment().diff(rental.dateOut, 'days');
+    // rental.rentalFee = movie.dailyRentalRate * diff;
+    rental.processRental();
 
     const task = new Fawn.Task();
 
     try {
+        // In Fawn i can use its update() method to update the seleted (using lodash) fields.
         task.update("rentals", {_id: rental._id}, {$set: lodash.pick(rental, ["dateReturned", "rentalFee"])} )
         .update("movies", {_id: movie._id}, {$inc: {numberInStock: 1}})
         .run();
@@ -44,6 +46,7 @@ router.post("", async (req, res, next) => {
         next(err);
     }
 
+    // In Fawn i cannot use this technique to save my rental object with changed fields only.
     // await rental.save();
 
     // movie.numberInStock++;

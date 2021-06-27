@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
+const moment = require("moment");
 
 // Points to remember that customer field of my rental schema can be like this:
 // const customerSchema = require("../models/customer");
@@ -33,6 +34,25 @@ const rentalSchema = new mongoose.Schema({
     dateOut: {type: Date, default: Date.now, required: true},
     dateReturned: {type: Date}
 });
+
+// In OOPS there are two types of class methods:
+// 1. Static Methods: these methods can be directly accessed using Class Name like Fawn.Task()
+// 2. Instance Methods: these methods can be only accessable with class intances or objects.
+
+// Static method of my Rental Model
+rentalSchema.statics.findRental = function(customerId, movieId) {
+    // here "this" represents the Rental Model
+    return this.findOne({"customer._id": customerId, "movie._id": movieId});
+    // I am returning the promise as it is. So i will not await this here. The function caller will do.
+}
+
+// Instance method of my Rental Model
+rentalSchema.methods.processRental = function() {
+    // here "this" represents the rentalSchema
+    this.dateReturned = new Date();
+    const diff = moment().diff(this.dateOut, 'days');
+    this.rentalFee = this.movie.dailyRentalRate * diff;
+}
 
 exports.Rental = mongoose.model("Rental", rentalSchema);
 
