@@ -15,7 +15,7 @@ To start the mongod server after installation
 To start Node.js server run (nodemon custom command)
 
 ```bash
-  npm run start:server
+  npm run dev
 ```
 To import a JSON file in my mongo compass database:
 

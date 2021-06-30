@@ -14,6 +14,12 @@ const checkAuth = (req, res, next) => {
         req.userData = decodedToken;
         next();
     } catch (err) {
+        if (err instanceof jwt.TokenExpiredError) {
+            return res.status(401).json({message: "Token has Expired"});
+        }
+        else if (err instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({message: `Token is Invalid, ${err.message}`});
+        }
         res.status(401).json({message: "Please login first!"});
     }
 };

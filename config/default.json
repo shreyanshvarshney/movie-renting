@@ -1,3 +1,4 @@
 {
-    "JWT_KEY": ""
+    "JWT_KEY": "",
+    "db": "mongodb://localhost/movie-renting-app"
 }

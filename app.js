@@ -27,7 +27,7 @@ mongoose.set('useNewUrlParser', true);
 mongoose.set('useUnifiedTopology', true);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
-mongoose.connect("mongodb://localhost/movie-renting-app")
+mongoose.connect(config.get("db"))
     .then(() => {dbDebug("Database Connected...")})
     .catch((err) => {dbDebug("Database Connection Failed...", err)});
 

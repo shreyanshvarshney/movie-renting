@@ -33,11 +33,11 @@ router.get("/me", checkAuth, async (req, res) => {
 router.post("/signup", async (req, res, next) => {
     const error = validateCreateUser(req.body).error;
     if (error) {
-        return res.status(400).json({message: error.message});
+        return res.status(422).json({message: error.message});
     }
 
     let user = await User.findOne({email: req.body.email});
-    if(user) return res.status(400).json({message: "User already exsits with this email!"});
+    if(user) return res.status(409).json({message: "User already exsits with this email!"});
 
     try {
         const hashed = await bcrypt.hash(req.body.password, 10);
