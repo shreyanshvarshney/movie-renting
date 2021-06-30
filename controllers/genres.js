@@ -2,9 +2,10 @@ const {Genre, validateGenre, validateObjectId} = require("../models/genre");
 const debug = require("debug")("app:genres.controller");
 
 exports.getGenres = async (req, res, next) => {
-    try { 
+    try {
         const result = await Genre.find().sort({name: 1}).select({__v: false});
         const count = await Genre.countDocuments();
+        if (req.timedout) return;
         res.status(200).json({data: result, count: count});
     } catch (err) {
         next(err)
